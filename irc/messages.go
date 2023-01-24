@@ -52,6 +52,13 @@ func (c *Client) Pong(token string) (err error) {
 	return
 }
 
+func (c *Client) Privmsg(target string, message string) (err error) {
+	msg := fmt.Sprintf("PRIVMSG %s :%s", target, message)
+	slog.Debug("sending PRIVMSG", "msg", msg)
+	_, err = fmt.Fprint(c, msg)
+	return
+}
+
 func (c *Client) Quit(message string) (err error) {
 	msg := fmt.Sprintf("QUIT :%s", message)
 	slog.Debug("sending QUIT", "msg", msg)
