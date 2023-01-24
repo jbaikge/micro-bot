@@ -27,10 +27,17 @@ const (
 	DrawEnd      = "\u2503"
 )
 
+const (
+	StreamFederated = "federated"
+	StreamLocal     = "local"
+	StreamTimeline  = "timeline"
+)
+
 // https://modern.ircdocs.horse/formatting.html
 var colors = []int{40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51}
 
 type Config struct {
+	Stream       string
 	Channel      string
 	Password     string
 	Server       string
@@ -62,7 +69,21 @@ func (m *Mastodon) Run(ctx context.Context) {
 		AccessToken:  m.config.AccessToken,
 	}
 	client := mastodon.NewClient(config)
-	events, err := client.StreamingPublic(ctx, false)
+
+	var events chan mastodon.Event
+	var err error
+	switch m.config.Stream {
+	case StreamFederated:
+		events, err = client.StreamingPublic(ctx, false)
+	case StreamLocal:
+		events, err = client.StreamingPublic(ctx, true)
+	case StreamTimeline:
+		events, err = client.StreamingUser(ctx)
+	default:
+		slog.Error("unable to determine stream", fmt.Errorf("unknown stream type: %s", m.config.Stream))
+		return
+	}
+
 	if err != nil {
 		slog.Error("unable to get stream", err)
 		return
@@ -76,10 +97,13 @@ func (m *Mastodon) Run(ctx context.Context) {
 		switch event := e.(type) {
 		case *mastodon.UpdateEvent:
 			slog.Debug("mastodon update", "url", event.Status.URL, "username", event.Status.Account.Username)
+			// Break up ending paragraph tags into newlines
 			content := strings.ReplaceAll(event.Status.Content, "</p>", "</p>\n")
+			// Strip HTML
 			content = re.ReplaceAllString(content, "")
+			// Break content up into lines
 			lines := strings.Split(strings.TrimRight(content, "\n"), "\n")
-			sep := "\u250f"
+			sep := DrawStart
 			for _, line := range lines {
 				message := fmt.Sprintf(
 					"%s%02d%s%s %s %s",
@@ -95,7 +119,7 @@ func (m *Mastodon) Run(ctx context.Context) {
 					continue
 				}
 				m.client.Privmsg(m.config.Channel, message)
-				sep = "\u2503"
+				sep = DrawContinue
 			}
 			link := fmt.Sprintf(
 				"%s%02d%s%s %s %s",
@@ -103,7 +127,7 @@ func (m *Mastodon) Run(ctx context.Context) {
 				m.color(event.Status.Account.Username),
 				event.Status.Account.Username,
 				FormatReset,
-				"\u2517",
+				DrawEnd,
 				event.Status.URL,
 			)
 			m.client.Privmsg(m.config.Channel, link)
