@@ -22,9 +22,9 @@ const (
 
 // https://www.w3schools.com/charsets/ref_utf_box.asp
 const (
-	DrawStart = "\u250f"
-	DrawContinue = "\u"
-	DrawEnd = "\u"
+	DrawStart    = "\u250f"
+	DrawContinue = "\u2503"
+	DrawEnd      = "\u2503"
 )
 
 // https://modern.ircdocs.horse/formatting.html
