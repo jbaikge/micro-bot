@@ -4,12 +4,31 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"hash/crc32"
 	"regexp"
+	"strings"
 
 	"github.com/jbaikge/micro-bot/irc"
 	"github.com/mattn/go-mastodon"
 	"golang.org/x/exp/slog"
 )
+
+const (
+	FormatBold   = "\x02"
+	FormatItalic = "\x1d"
+	FormatColor  = "\x03"
+	FormatReset  = "\x0f"
+)
+
+// https://www.w3schools.com/charsets/ref_utf_box.asp
+const (
+	DrawStart = "\u250f"
+	DrawContinue = "\u"
+	DrawEnd = "\u"
+)
+
+// https://modern.ircdocs.horse/formatting.html
+var colors = []int{40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51}
 
 type Config struct {
 	Channel      string
@@ -57,13 +76,37 @@ func (m *Mastodon) Run(ctx context.Context) {
 		switch event := e.(type) {
 		case *mastodon.UpdateEvent:
 			slog.Debug("mastodon update", "url", event.Status.URL, "username", event.Status.Account.Username)
-			content := re.ReplaceAllString(event.Status.Content, "")
-			message := fmt.Sprintf("<%s> %s", event.Status.Account.Username, content)
-			if len(message) > 500 {
-				slog.Warn("message too long, not sending", "msg", message)
-				continue
+			content := strings.ReplaceAll(event.Status.Content, "</p>", "</p>\n")
+			content = re.ReplaceAllString(content, "")
+			lines := strings.Split(strings.TrimRight(content, "\n"), "\n")
+			sep := "\u250f"
+			for _, line := range lines {
+				message := fmt.Sprintf(
+					"%s%02d%s%s %s %s",
+					FormatColor,
+					m.color(event.Status.Account.Username),
+					event.Status.Account.Username,
+					FormatReset,
+					sep,
+					line,
+				)
+				if len(message) > 500 {
+					slog.Warn("message too long, not sending", "msg", message)
+					continue
+				}
+				m.client.Privmsg(m.config.Channel, message)
+				sep = "\u2503"
 			}
-			m.client.Privmsg(m.config.Channel, message)
+			link := fmt.Sprintf(
+				"%s%02d%s%s %s %s",
+				FormatColor,
+				m.color(event.Status.Account.Username),
+				event.Status.Account.Username,
+				FormatReset,
+				"\u2517",
+				event.Status.URL,
+			)
+			m.client.Privmsg(m.config.Channel, link)
 		case *mastodon.NotificationEvent:
 			slog.Debug("mastodon notification", "type", event.Notification.Type, "username", event.Notification.Account.Username)
 		case *mastodon.ErrorEvent:
@@ -74,4 +117,10 @@ func (m *Mastodon) Run(ctx context.Context) {
 			slog.Info("not sure how to handle this event type", "event", event)
 		}
 	}
+}
+
+func (m *Mastodon) color(username string) int {
+	sum := crc32.ChecksumIEEE([]byte(username))
+	idx := int(sum) % len(colors)
+	return colors[idx]
 }
