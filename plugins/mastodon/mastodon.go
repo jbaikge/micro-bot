@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 
 	"github.com/jbaikge/micro-bot/irc"
 	"github.com/mattn/go-mastodon"
@@ -12,6 +13,7 @@ import (
 
 type Config struct {
 	Channel      string
+	Password     string
 	Server       string
 	ClientID     string
 	ClientSecret string
@@ -47,13 +49,20 @@ func (m *Mastodon) Run(ctx context.Context) {
 		return
 	}
 
-	m.client.Join(m.config.Channel, "")
+	m.client.Join(m.config.Channel, m.config.Password)
+
+	re := regexp.MustCompile(`<.*?>`)
 
 	for e := range events {
 		switch event := e.(type) {
 		case *mastodon.UpdateEvent:
 			slog.Debug("mastodon update", "url", event.Status.URL, "username", event.Status.Account.Username)
-			message := fmt.Sprintf("<%s> %s", event.Status.Account.Username, event.Status.Content)
+			content := re.ReplaceAllString(event.Status.Content, "")
+			message := fmt.Sprintf("<%s> %s", event.Status.Account.Username, content)
+			if len(message) > 500 {
+				slog.Warn("message too long, not sending", "msg", message)
+				continue
+			}
 			m.client.Privmsg(m.config.Channel, message)
 		case *mastodon.NotificationEvent:
 			slog.Debug("mastodon notification", "type", event.Notification.Type, "username", event.Notification.Account.Username)
