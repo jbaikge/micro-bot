@@ -114,11 +114,11 @@ func (m *Mastodon) Run(ctx context.Context) {
 					"%s%02d%s%s reblogged %s%02d%s%s:",
 					FormatColor,
 					accountColor,
-					event.Status.Account.Username,
+					event.Status.Account.DisplayName,
 					FormatReset,
 					FormatColor,
 					color(event.Status.Reblog.Account),
-					event.Status.Reblog.Account.Username,
+					event.Status.Reblog.Account.DisplayName,
 					FormatReset,
 				)
 				m.client.Privmsg(m.config.Channel, header)
@@ -130,7 +130,7 @@ func (m *Mastodon) Run(ctx context.Context) {
 					"%s%02d%s%s %s",
 					FormatColor,
 					accountColor,
-					event.Status.Account.Username,
+					event.Status.Account.DisplayName,
 					FormatReset,
 					line,
 				)
@@ -144,7 +144,7 @@ func (m *Mastodon) Run(ctx context.Context) {
 				"%s%02d%s%s \u00bb %s",
 				FormatColor,
 				accountColor,
-				event.Status.Account.Username,
+				event.Status.Account.DisplayName,
 				FormatReset,
 				event.Status.URL,
 			)
