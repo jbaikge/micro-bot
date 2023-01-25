@@ -2,12 +2,12 @@ package irc
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"net"
 	"strings"
+	"time"
 
 	"golang.org/x/exp/slog"
 )
@@ -28,6 +28,7 @@ type Client struct {
 	config     Config
 	connection *net.TCPConn
 	ctx        context.Context
+	ticker     *time.Ticker
 }
 
 // Creates a new client and connects to the IRC server
@@ -35,6 +36,7 @@ func NewClient(ctx context.Context, config Config) (client *Client, err error) {
 	client = &Client{
 		ctx:    ctx,
 		config: config,
+		ticker: time.NewTicker(100 * time.Millisecond),
 	}
 
 	if client.connection, err = client.connect(); err != nil {
@@ -60,13 +62,8 @@ func (c *Client) Disconnect() {
 }
 
 func (c *Client) Write(p []byte) (n int, err error) {
-	scanner := bufio.NewScanner(bytes.NewReader(p))
-	for scanner.Scan() {
-		_, err = fmt.Fprint(c.connection, scanner.Text(), "\r\n")
-		if err != nil {
-			return
-		}
-	}
+	<-c.ticker.C
+	fmt.Fprint(c.connection, string(p), "\r\n")
 	return len(p), nil
 }
 
