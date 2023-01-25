@@ -103,18 +103,25 @@ func (m *Mastodon) Run(ctx context.Context) {
 	for e := range events {
 		switch event := e.(type) {
 		case *mastodon.UpdateEvent:
-			slog.Debug("mastodon update", "url", event.Status.URL, "id", event.Status.Account.ID, "username", event.Status.Account.Username)
-			// // Break up ending paragraph tags into newlines
-			// content := strings.ReplaceAll(event.Status.Content, "</p>", "</p>\n")
-			// // Strip HTML
-			// content = re.ReplaceAllString(content, "")
-			// // Break content up into lines
-			// lines := strings.Split(strings.TrimRight(content, "\n"), "\n")
+			slog.Debug("mastodon update", "url", event.Status.URL)
 			// Caclulate username color
-			color := m.color(event.Status.Account)
+			accountColor := color(event.Status.Account)
+			isReblog := event.Status.Reblog != nil
 			var text string
-			if event.Status.Reblog != nil {
+			if isReblog {
 				text = textContent(event.Status.Reblog.Content)
+				header := fmt.Sprintf(
+					"%s%02d%s%s reblogged %s%02d%s%s:",
+					FormatColor,
+					accountColor,
+					event.Status.Account.Username,
+					FormatReset,
+					FormatColor,
+					color(event.Status.Reblog.Account),
+					event.Status.Reblog.Account.Username,
+					FormatReset,
+				)
+				m.client.Privmsg(m.config.Channel, header)
 			} else {
 				text = textContent(event.Status.Content)
 			}
@@ -122,7 +129,7 @@ func (m *Mastodon) Run(ctx context.Context) {
 				message := fmt.Sprintf(
 					"%s%02d%s%s %s",
 					FormatColor,
-					color,
+					accountColor,
 					event.Status.Account.Username,
 					FormatReset,
 					line,
@@ -136,7 +143,7 @@ func (m *Mastodon) Run(ctx context.Context) {
 			link := fmt.Sprintf(
 				"%s%02d%s%s \u00bb %s",
 				FormatColor,
-				color,
+				accountColor,
 				event.Status.Account.Username,
 				FormatReset,
 				event.Status.URL,
@@ -154,7 +161,7 @@ func (m *Mastodon) Run(ctx context.Context) {
 	}
 }
 
-func (m *Mastodon) color(account mastodon.Account) int {
+func color(account mastodon.Account) int {
 	id, _ := strconv.ParseInt(string(account.ID), 10, 64)
 	idx := id % int64(len(colors))
 	return colors[idx]
@@ -181,7 +188,7 @@ func extractText(node *html.Node, w *bytes.Buffer) {
 		extractText(c, w)
 	}
 	if node.Type == html.ElementNode {
-		if name := strings.ToLower(node.Data); name == "br" {
+		if name := strings.ToLower(node.Data); name == "br" || name == "p" {
 			w.WriteRune('\n')
 		}
 	}
