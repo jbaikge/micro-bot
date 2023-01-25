@@ -1,16 +1,17 @@
 package mastodon
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
-	"hash/crc32"
-	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/jbaikge/micro-bot/irc"
 	"github.com/mattn/go-mastodon"
 	"golang.org/x/exp/slog"
+	"golang.org/x/net/html"
 )
 
 const (
@@ -97,23 +98,31 @@ func (m *Mastodon) Run(ctx context.Context) {
 
 	m.client.Join(m.config.Channel, m.config.Password)
 
-	re := regexp.MustCompile(`<.*?>`)
+	// re := regexp.MustCompile(`<.*?>`)
 
 	for e := range events {
 		switch event := e.(type) {
 		case *mastodon.UpdateEvent:
-			slog.Debug("mastodon update", "url", event.Status.URL, "username", event.Status.Account.Username)
-			// Break up ending paragraph tags into newlines
-			content := strings.ReplaceAll(event.Status.Content, "</p>", "</p>\n")
-			// Strip HTML
-			content = re.ReplaceAllString(content, "")
-			// Break content up into lines
-			lines := strings.Split(strings.TrimRight(content, "\n"), "\n")
-			for _, line := range lines {
+			slog.Debug("mastodon update", "url", event.Status.URL, "id", event.Status.Account.ID, "username", event.Status.Account.Username)
+			// // Break up ending paragraph tags into newlines
+			// content := strings.ReplaceAll(event.Status.Content, "</p>", "</p>\n")
+			// // Strip HTML
+			// content = re.ReplaceAllString(content, "")
+			// // Break content up into lines
+			// lines := strings.Split(strings.TrimRight(content, "\n"), "\n")
+			// Caclulate username color
+			color := m.color(event.Status.Account)
+			var text string
+			if event.Status.Reblog != nil {
+				text = textContent(event.Status.Reblog.Content)
+			} else {
+				text = textContent(event.Status.Content)
+			}
+			for _, line := range strings.Split(text, "\n") {
 				message := fmt.Sprintf(
 					"%s%02d%s%s %s",
 					FormatColor,
-					m.color(event.Status.Account.Username),
+					color,
 					event.Status.Account.Username,
 					FormatReset,
 					line,
@@ -127,7 +136,7 @@ func (m *Mastodon) Run(ctx context.Context) {
 			link := fmt.Sprintf(
 				"%s%02d%s%s \u00bb %s",
 				FormatColor,
-				m.color(event.Status.Account.Username),
+				color,
 				event.Status.Account.Username,
 				FormatReset,
 				event.Status.URL,
@@ -145,8 +154,35 @@ func (m *Mastodon) Run(ctx context.Context) {
 	}
 }
 
-func (m *Mastodon) color(username string) int {
-	sum := crc32.ChecksumIEEE([]byte(username))
-	idx := int(sum) % len(colors)
+func (m *Mastodon) color(account mastodon.Account) int {
+	id, _ := strconv.ParseInt(string(account.ID), 10, 64)
+	idx := id % int64(len(colors))
 	return colors[idx]
+}
+
+// Shamelessly ripped from go-mastodon's main.go
+func textContent(s string) string {
+	doc, err := html.Parse(strings.NewReader(s))
+	if err != nil {
+		return s
+	}
+	var buf bytes.Buffer
+	extractText(doc, &buf)
+	return strings.TrimRight(buf.String(), "\n")
+}
+
+func extractText(node *html.Node, w *bytes.Buffer) {
+	if node.Type == html.TextNode {
+		if data := strings.Trim(node.Data, "\r\n"); data != "" {
+			w.WriteString(data)
+		}
+	}
+	for c := node.FirstChild; c != nil; c = c.NextSibling {
+		extractText(c, w)
+	}
+	if node.Type == html.ElementNode {
+		if name := strings.ToLower(node.Data); name == "br" {
+			w.WriteRune('\n')
+		}
+	}
 }
