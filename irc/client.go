@@ -12,6 +12,8 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+const MaxMessageLength = 500
+
 var _ io.Writer = &Client{}
 
 type Config struct {
@@ -62,8 +64,15 @@ func (c *Client) Disconnect() {
 }
 
 func (c *Client) Write(p []byte) (n int, err error) {
-	<-c.ticker.C
-	fmt.Fprint(c.connection, string(p), "\r\n")
+	for i := 0; i < len(p)/MaxMessageLength+1; i++ {
+		<-c.ticker.C
+		low := i * MaxMessageLength
+		high := low + MaxMessageLength
+		if high > len(p) {
+			high = len(p)
+		}
+		fmt.Fprint(c.connection, string(p[low:high]), "\r\n")
+	}
 	return len(p), nil
 }
 
