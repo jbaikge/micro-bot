@@ -34,7 +34,13 @@ const (
 )
 
 // https://modern.ircdocs.horse/formatting.html
-var colors = []int{40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51}
+var colors = []int{
+	// Default colors in the first-16 space. Skipping the blues because they are
+	// hard to see on a black background
+	3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15,
+	// Some more specific shades of colors
+	// 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51
+}
 
 type Config struct {
 	Stream       string
@@ -103,15 +109,13 @@ func (m *Mastodon) Run(ctx context.Context) {
 			content = re.ReplaceAllString(content, "")
 			// Break content up into lines
 			lines := strings.Split(strings.TrimRight(content, "\n"), "\n")
-			sep := DrawStart
 			for _, line := range lines {
 				message := fmt.Sprintf(
-					"%s%02d%s%s %s %s",
+					"%s%02d%s%s %s",
 					FormatColor,
 					m.color(event.Status.Account.Username),
 					event.Status.Account.Username,
 					FormatReset,
-					sep,
 					line,
 				)
 				if len(message) > 500 {
@@ -119,15 +123,13 @@ func (m *Mastodon) Run(ctx context.Context) {
 					continue
 				}
 				m.client.Privmsg(m.config.Channel, message)
-				sep = DrawContinue
 			}
 			link := fmt.Sprintf(
-				"%s%02d%s%s %s %s",
+				"%s%02d%s%s \u00bb %s",
 				FormatColor,
 				m.color(event.Status.Account.Username),
 				event.Status.Account.Username,
 				FormatReset,
-				DrawEnd,
 				event.Status.URL,
 			)
 			m.client.Privmsg(m.config.Channel, link)
