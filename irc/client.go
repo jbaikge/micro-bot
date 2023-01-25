@@ -36,7 +36,7 @@ func NewClient(ctx context.Context, config Config) (client *Client, err error) {
 	client = &Client{
 		ctx:    ctx,
 		config: config,
-		ticker: time.NewTicker(100 * time.Millisecond),
+		ticker: time.NewTicker(250 * time.Millisecond),
 	}
 
 	if client.connection, err = client.connect(); err != nil {
