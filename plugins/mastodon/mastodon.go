@@ -140,13 +140,17 @@ func (m *Mastodon) Run(ctx context.Context) {
 				}
 				m.client.Privmsg(m.config.Channel, message)
 			}
+			url := event.Status.URL
+			if isReblog {
+				url = event.Status.Reblog.URL
+			}
 			link := fmt.Sprintf(
 				"%s%02d%s%s \u00bb %s",
 				FormatColor,
 				accountColor,
 				event.Status.Account.DisplayName,
 				FormatReset,
-				event.Status.URL,
+				url,
 			)
 			m.client.Privmsg(m.config.Channel, link)
 		case *mastodon.NotificationEvent:
