@@ -121,7 +121,6 @@ func (c *Client) readLoop() {
 	scanner := bufio.NewScanner(c.connection)
 	for scanner.Scan() {
 		message := scanner.Text()
-		fmt.Println(message)
 		parts := strings.Fields(message)
 		switch strings.ToUpper(parts[0]) {
 		case "PING":
