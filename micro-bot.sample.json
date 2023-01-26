@@ -1,0 +1,35 @@
+{
+    "irc": {
+        "server":   "localhost:6667",
+        "nick":     "bot",
+        "realname": "Micro Bot",
+        "username": "micro-bot"
+    },
+    "mastodon": [
+        {
+            "stream":        "timeline",
+            "channel":       "#m_username",
+            "server":        "mastodon.server.domain",
+            "client_id":     "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "client_secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "access_token":  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        },
+        {
+            "stream":        "federated",
+            "channel":       "#m_federated",
+            "server":        "mastodon.server.domain",
+            "client_id":     "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "client_secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "access_token":  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+    ],
+    "twitter": [
+        {
+            "channel":             "#t_username",
+            "apiKey":              "xxxxxxxxxxxxxxxxxxxxxxxxx",
+            "api_key_secret":      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "access_token":        "123456789-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "access_token_secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+    ]
+}
