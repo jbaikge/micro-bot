@@ -14,13 +14,6 @@ import (
 	"golang.org/x/net/html"
 )
 
-const (
-	FormatBold   = "\x02"
-	FormatItalic = "\x1d"
-	FormatColor  = "\x03"
-	FormatReset  = "\x0f"
-)
-
 // https://www.w3schools.com/charsets/ref_utf_box.asp
 const (
 	DrawStart    = "\u250f"
@@ -33,15 +26,6 @@ const (
 	StreamLocal     = "local"
 	StreamTimeline  = "timeline"
 )
-
-// https://modern.ircdocs.horse/formatting.html
-var colors = []int{
-	// Default colors in the first-16 space. Skipping the blues because they are
-	// hard to see on a black background
-	3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15,
-	// Some more specific shades of colors
-	// 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51
-}
 
 type Config struct {
 	Stream       string
@@ -112,14 +96,14 @@ func (m *Mastodon) Run(ctx context.Context) {
 				text = textContent(event.Status.Reblog.Content)
 				header := fmt.Sprintf(
 					"%s%02d%s%s reblogged %s%02d%s%s:",
-					FormatColor,
+					irc.FormatColor,
 					accountColor,
 					event.Status.Account.DisplayName,
-					FormatReset,
-					FormatColor,
+					irc.FormatReset,
+					irc.FormatColor,
 					color(event.Status.Reblog.Account),
 					event.Status.Reblog.Account.DisplayName,
-					FormatReset,
+					irc.FormatReset,
 				)
 				m.client.Privmsg(m.config.Channel, header)
 			} else {
@@ -128,10 +112,10 @@ func (m *Mastodon) Run(ctx context.Context) {
 			for _, line := range strings.Split(text, "\n") {
 				message := fmt.Sprintf(
 					"%s%02d%s%s %s",
-					FormatColor,
+					irc.FormatColor,
 					accountColor,
 					event.Status.Account.DisplayName,
-					FormatReset,
+					irc.FormatReset,
 					line,
 				)
 				if len(message) > 500 {
@@ -146,10 +130,10 @@ func (m *Mastodon) Run(ctx context.Context) {
 			}
 			link := fmt.Sprintf(
 				"%s%02d%s%s \u00bb %s",
-				FormatColor,
+				irc.FormatColor,
 				accountColor,
 				event.Status.Account.DisplayName,
-				FormatReset,
+				irc.FormatReset,
 				url,
 			)
 			m.client.Privmsg(m.config.Channel, link)
@@ -167,8 +151,8 @@ func (m *Mastodon) Run(ctx context.Context) {
 
 func color(account mastodon.Account) int {
 	id, _ := strconv.ParseInt(string(account.ID), 10, 64)
-	idx := id % int64(len(colors))
-	return colors[idx]
+	idx := id % int64(len(irc.Colors))
+	return irc.Colors[idx]
 }
 
 // Shamelessly ripped from go-mastodon's main.go

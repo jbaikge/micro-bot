@@ -14,6 +14,22 @@ import (
 
 const MaxMessageLength = 500
 
+const (
+	FormatBold   = "\x02"
+	FormatItalic = "\x1d"
+	FormatColor  = "\x03"
+	FormatReset  = "\x0f"
+)
+
+// https://modern.ircdocs.horse/formatting.html
+var Colors = []int{
+	// Default colors in the first-16 space. Skipping the blues because they are
+	// hard to see on a black background
+	3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15,
+	// Some more specific shades of colors
+	// 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51
+}
+
 var _ io.Writer = &Client{}
 
 type Config struct {
