@@ -10,9 +10,9 @@ import (
 )
 
 type Config struct {
-	IRC      irc.Config
-	Mastodon []mastodon.Config
-	Twitter  []twitter.Config
+	IRC      irc.Config        `json:"irc"`
+	Mastodon []mastodon.Config `json:"mastodon"`
+	Twitter  []twitter.Config  `json:"twitter"`
 }
 
 func ParseConfig(filename string) (c Config, err error) {

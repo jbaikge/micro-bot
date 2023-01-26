@@ -22,12 +22,12 @@ import (
 const APIRateLimit = 15 * 60 / 15 * time.Second
 
 type Config struct {
-	Channel           string
-	Password          string
-	ApiKey            string
-	ApiKeySecret      string
-	AccessToken       string
-	AccessTokenSecret string
+	Channel           string `json:"channel"`
+	Password          string `json:"password"`
+	ApiKey            string `json:"api_key"`
+	ApiKeySecret      string `json:"api_key_secret"`
+	AccessToken       string `json:"access_token"`
+	AccessTokenSecret string `json:"access_token_secret"`
 }
 
 type Tweet struct {

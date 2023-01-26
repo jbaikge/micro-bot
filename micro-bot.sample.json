@@ -2,6 +2,7 @@
     "irc": {
         "server":   "localhost:6667",
         "nick":     "bot",
+        "password": "password",
         "realname": "Micro Bot",
         "username": "micro-bot"
     },
@@ -9,6 +10,7 @@
         {
             "stream":        "timeline",
             "channel":       "#m_username",
+            "password":      "password",
             "server":        "mastodon.server.domain",
             "client_id":     "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
             "client_secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
@@ -17,6 +19,7 @@
         {
             "stream":        "federated",
             "channel":       "#m_federated",
+            "password":      "password",
             "server":        "mastodon.server.domain",
             "client_id":     "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
             "client_secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
@@ -26,7 +29,8 @@
     "twitter": [
         {
             "channel":             "#t_username",
-            "apiKey":              "xxxxxxxxxxxxxxxxxxxxxxxxx",
+            "password":            "password",
+            "api_key":             "xxxxxxxxxxxxxxxxxxxxxxxxx",
             "api_key_secret":      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
             "access_token":        "123456789-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
             "access_token_secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

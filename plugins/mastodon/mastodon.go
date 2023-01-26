@@ -28,13 +28,13 @@ const (
 )
 
 type Config struct {
-	Stream       string
-	Channel      string
-	Password     string
-	Server       string
-	ClientID     string
-	ClientSecret string
-	AccessToken  string
+	Stream       string `json:"stream"`
+	Channel      string `json:"channel"`
+	Password     string `json:"password"`
+	Server       string `json:"server"`
+	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+	AccessToken  string `json:"access_token"`
 }
 
 type Mastodon struct {
