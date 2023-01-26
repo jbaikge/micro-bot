@@ -1,0 +1,9 @@
+[Unit]
+Description=Micro Bot micro-blogging IRC bot
+Wants=network.target
+
+[Service]
+ExecStart=/usr/local/bin/micro-bot -config /root/.config/micro-bot/micro-bot.json
+
+[Install]
+WantedBy=default.target
