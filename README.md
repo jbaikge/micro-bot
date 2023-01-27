@@ -56,7 +56,7 @@ It is _highly_ recommended to run a local IRC server to connect the bot to, then
   * `timeline` - posts from people you follow
 * `channel` is the IRC channel to join, the leading pound sign is required
 * `password` is the password used to access the IRC channel, it may be blank
-* `server` is your server's domain name, please exclude the protocol (https)
+* `server` is your server's domain name, please include the protocol (https)
 
 Set up `client_id`, `client_secret`, and `access_token`:
 1. Login to your Mastodon server, preferrably on a computer
