@@ -22,7 +22,7 @@ var (
 func init() {
 	configFile = filepath.Join(os.Getenv("HOME"), ".config", "micro-bot", "micro-bot.json")
 	flag.StringVar(&configFile, "config", configFile, "Location of config file")
-	flag.BoolVar(&debugMode, "debug", true, "Enable debug messages")
+	flag.BoolVar(&debugMode, "debug", debugMode, "Enable debug messages")
 }
 
 func main() {
