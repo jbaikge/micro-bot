@@ -197,7 +197,6 @@ func (t *Twitter) getLatest() (tweets []Tweet, err error) {
 	if err != nil {
 		return
 	}
-	fmt.Printf("%+v\n", data)
 
 	// No sense in doing anything if there is nothing new
 	if len(data.Tweets) == 0 {
